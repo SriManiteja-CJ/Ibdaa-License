@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trade Name Validation System</title>
+  <style>
+    /* ================================================================
+       RESET & BASE
+    ================================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand:          #1a56db;
+      --brand-dark:     #1341a8;
+      --brand-light:    #eff4ff;
+      --success:        #047857;
+      --success-bg:     #f0fdf4;
+      --success-border: #a7f3d0;
+      --danger:         #b91c1c;
+      --danger-bg:      #fef2f2;
+      --danger-border:  #fecaca;
+      --warn:           #b45309;
+      --warn-bg:        #fffbeb;
+      --warn-border:    #fde68a;
+      --info:           #1e429f;
+      --info-bg:        #ebf5ff;
+      --info-border:    #bfdbfe;
+      --neutral:        #374151;
+      --neutral-light:  #6b7280;
+      --neutral-faint:  #f9fafb;
+      --border:         #e5e7eb;
+      --radius:         12px;
+      --radius-sm:      8px;
+      --shadow-sm:      0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+      --font:           -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: #f3f4f6;
+      color: var(--neutral);
+      min-height: 100vh;
+      padding: 2.5rem 1rem 4rem;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* HEADER */
+    .page-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .page-header .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px; height: 56px;
+      background: var(--brand);
+      border-radius: 16px;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 12px rgba(26,86,219,.3);
+    }
+    .page-header .logo svg { width: 30px; height: 30px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .page-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: -.02em;
+    }
+    .page-header p {
+      margin-top: .4rem;
+      color: var(--neutral-light);
+      font-size: .95rem;
+    }
+
+    /* CARD */
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.25rem;
+    }
+    .card-title {
+      font-size: .78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--neutral-light);
+      margin-bottom: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .card-title .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--brand);
+      flex-shrink: 0;
+    }
+
+    /* FORM */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.1rem;
+      margin-bottom: 1.2rem;
+    }
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+    .form-group { display: flex; flex-direction: column; gap: .45rem; }
+    label {
+      font-size: .85rem;
+      font-weight: 600;
+      color: #374151;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: .65rem .9rem;
+      border: 1.5px solid #d1d5db;
+      border-radius: var(--radius-sm);
+      font-size: .95rem;
+      font-family: var(--font);
+      color: var(--neutral);
+      background: #fff;
+      transition: border-color .18s, box-shadow .18s;
+      outline: none;
+    }
+    input[type="text"]:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(26,86,219,.12);
+    }
+
+    /* SMALL VALIDATE BUTTON */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: auto;
+      min-width: 170px;
+      padding: .55rem 1.25rem;
+      background: var(--brand);
+      color: #fff;
+      font-size: .88rem;
+      font-weight: 600;
+      font-family: var(--font);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background .18s, transform .1s;
+      margin-top: .4rem;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--brand-dark); }
+    .btn-primary:active:not(:disabled) { transform: scale(.99); }
+    .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; }
+
+    /* SPINNER */
+    #spinner-wrap {
+      display: none;
+      text-align: center;
+      padding: 2rem 0 1rem;
+    }
+    .spinner {
+      display: inline-block;
+      width: 38px; height: 38px;
+      border: 3.5px solid #dbeafe;
+      border-top-color: var(--brand);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #spinner-wrap p {
+      margin-top: .75rem;
+      color: var(--neutral-light);
+      font-size: .9rem;
+    }
+
+    /* STATUS BANNERS */
+    .status-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid;
+      margin-bottom: 1.25rem;
+      font-size: .95rem;
+    }
+    .status-banner.success {
+      background: var(--success-bg);
+      border-color: var(--success-border);
+      color: var(--success);
+    }
+    .status-banner.danger {
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      color: var(--danger);
+    }
+    .status-banner.warn {
+      background: var(--warn-bg);
+      border-color: var(--warn-border);
+      color: var(--warn);
+    }
+    .status-banner .icon {
+      flex-shrink: 0;
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+    .status-banner .text strong {
+      display: block;
+      font-size: 1.05rem;
+      margin-bottom: .25rem;
+    }
+    .status-banner .text p {
+      font-size: .9rem;
+      opacity: .95;
+    }
+
+    /* VALIDATION DETAILS */
+    .validation-detail-box {
+      margin-top: .75rem;
+      background: #fff;
+      border: 1px solid var(--warn-border);
+      border-radius: var(--radius-sm);
+      padding: .85rem 1rem;
+      font-size: .88rem;
+    }
+    .validation-detail-box strong { color: #78350f; }
+
+    /* SUGGESTION GRID */
+    .suggestions-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: .75rem;
+    }
+    .suggestion-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: .9rem 1.1rem;
+      background: var(--brand-light);
+      border: 1.5px solid #c7d7fd;
+      border-radius: var(--radius-sm);
+    }
+    .suggestion-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px; height: 30px;
+      background: var(--brand);
+      color: #fff;
+      border-radius: 50%;
+      font-size: .82rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .suggestion-name {
+      font-size: .98rem;
+      font-weight: 600;
+      color: #1e3a8a;
+    }
+
+    /* MATCHES TABLE */
+    .matches-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .88rem;
+    }
+    .matches-table thead tr { background: var(--neutral-faint); }
+    .matches-table th {
+      padding: .6rem .85rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: .77rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--neutral-light);
+      border-bottom: 1px solid var(--border);
+    }
+    .matches-table td {
+      padding: .65rem .85rem;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .badge {
+      display: inline-block;
+      padding: .2rem .6rem;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+    .badge-high { background: #fee2e2; color: #991b1b; }
+    .badge-mid  { background: #fef3c7; color: #92400e; }
+
+    .match-explanation {
+      font-size: .78rem;
+      color: var(--neutral-light);
+      padding: .2rem .85rem .6rem 2.85rem;
+    }
+    .word-chip {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1e40af;
+      font-size: .72rem;
+      font-weight: 600;
+      padding: .1rem .45rem;
+      border-radius: 999px;
+      margin-right: .3rem;
+      margin-top: .2rem;
+    }
+
+    .error-box {
+      display: none;
+      padding: .9rem 1.1rem;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      border-radius: var(--radius-sm);
+      color: var(--danger);
+      font-size: .88rem;
+      margin-top: .75rem;
+    }
+
+    #results { display: none; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="page-header">
+    <div class="logo">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    </div>
+    <h1>Trade Name Validation System</h1>
+    <p>Check proposed trade names against business rules and similarity dataset.</p>
+  </header>
+
+  <!-- FORM -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Enter Trade Name Details</div>
+    <form id="checkForm" autocomplete="off">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="tradeName">Trade Name</label>
+          <input type="text" id="tradeName" placeholder="e.g. ABC Trading, Rancho Fresh Poultry" required />
+        </div>
+        <div class="form-group">
+          <label for="category">Business Category</label>
+          <input type="text" id="category" placeholder="e.g. Grocery, Restaurant, Mobile Trading" required />
+        </div>
+      </div>
+      <button type="submit" id="submitBtn" class="btn-primary">Validate Trade Name</button>
+      <div class="error-box" id="errorBox"></div>
+    </form>
+  </div>
+
+  <!-- SPINNER -->
+  <div id="spinner-wrap">
+    <div class="spinner"></div>
+    <p id="spinnerText">Validating trade name against dataset & business activity rules...</p>
+  </div>
+
+    <!-- RESULTS -->
+    <div id="results">
+
+      <!-- MAIN RESULT BANNER -->
+      <div id="statusBanner" class="status-banner">
+        <div class="icon" id="statusIcon" style="display:none;"></div>
+        <div class="text" id="statusText"></div>
+      </div>
+
+      <!-- VALIDATION ERROR DETAILS -->
+      <div id="validationDetailsCard" class="card" style="display:none;">
+        <div class="card-title"><span class="dot" style="background:var(--warn)"></span>⚠️ Validation Issue Details</div>
+        <div id="validationDetailsContent"></div>
+      </div>
+
+      <!-- SIMILAR MATCHES TABLE (FOUND IN EXCEL SHEET) -->
+      <div class="card" id="similarCard" style="display:none;">
+        <div class="card-title"><span class="dot" style="background:var(--neutral-light)"></span>Similar Trade Names Found</div>
+        <table class="matches-table">
+          <thead>
+            <tr>
+              <th style="width: 2.5rem">#</th>
+              <th>Existing Trade Name</th>
+              <th style="text-align:right">Similarity</th>
+            </tr>
+          </thead>
+          <tbody id="matchesBody"></tbody>
+        </table>
+      </div>
+
+      <!-- AI SUGGESTIONS (ALTERNATIVE NAMES) -->
+      <div class="card" id="suggestionsCard" style="display:none;">
+        <div class="card-title"><span class="dot" style="background:var(--brand)"></span>💡 Alternative Suggestions</div>
+        <div class="suggestions-grid" id="suggestionsGrid"></div>
+      </div>
+
+    </div><!-- /#results -->
+
+  </div><!-- /.page -->
+
+  <script>
+    const form           = document.getElementById("checkForm");
+    const submitBtn      = document.getElementById("submitBtn");
+    const errorBox       = document.getElementById("errorBox");
+    const spinnerWrap    = document.getElementById("spinner-wrap");
+    const spinnerText    = document.getElementById("spinnerText");
+    const resultsDiv     = document.getElementById("results");
+
+    const statusBanner   = document.getElementById("statusBanner");
+    const statusIcon     = document.getElementById("statusIcon");
+    const statusText     = document.getElementById("statusText");
+
+    const valCard        = document.getElementById("validationDetailsCard");
+    const valContent     = document.getElementById("validationDetailsContent");
+
+    const suggestCard    = document.getElementById("suggestionsCard");
+    const suggestGrid    = document.getElementById("suggestionsGrid");
+
+    const similarCard    = document.getElementById("similarCard");
+    const matchesBody    = document.getElementById("matchesBody");
+
+    function removeArabicScript(text) {
+      if (!text) return "";
+      return text.replace(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g, "").trim();
+    }
+
+    function badgeClass(score) {
+      if (score >= 90) return "badge badge-high";
+      return "badge badge-mid";
+    }
+
+    function resetUI() {
+      errorBox.style.display   = "none";
+      errorBox.textContent     = "";
+      resultsDiv.style.display = "none";
+      valCard.style.display    = "none";
+      suggestCard.style.display= "none";
+      similarCard.style.display= "none";
+      matchesBody.innerHTML    = "";
+      suggestGrid.innerHTML    = "";
+      valContent.innerHTML     = "";
+      statusBanner.className   = "status-banner";
+    }
+
+    function showSpinner(msg) {
+      spinnerText.textContent   = msg;
+      spinnerWrap.style.display = "block";
+    }
+    function hideSpinner() {
+      spinnerWrap.style.display = "none";
+    }
+
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const tradeName = document.getElementById("tradeName").value.trim();
+      const category  = document.getElementById("category").value.trim();
+      if (!tradeName || !category) return;
+
+      resetUI();
+      submitBtn.disabled = true;
+      showSpinner("Validating trade name against dataset & business activity rules...");
+
+      try {
+        const response = await fetch("/check-trade-name", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ trade_name: tradeName, category })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err.detail || `Server error ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // 1. Render Status Banner
+        if (data.allowed) {
+          statusBanner.className = "status-banner success";
+          statusIcon.innerHTML = "";
+          statusIcon.style.display = "none";
+          statusText.innerHTML = `
+            <strong>No similar trade found</strong>
+          `;
+        } else {
+          statusBanner.className = "status-banner danger";
+          statusIcon.innerHTML = "";
+          statusIcon.style.display = "none";
+
+          let subtextReason = data.message;
+          if (subtextReason.startsWith("Reason: ")) {
+            subtextReason = subtextReason.substring(8);
+          }
+
+          statusText.innerHTML = `
+            <strong>${subtextReason}</strong>
+          `;
+        }
+
+        // 2. Render Validation Details if applicable
+        if (data.validation_required && data.flagged_words.length > 0) {
+          data.flagged_words.forEach(fw => {
+            const div = document.createElement("div");
+            div.className = "validation-detail-box";
+            div.innerHTML = `
+              <div><strong>Word:</strong> ${removeArabicScript(fw.word)}</div>
+              <div><strong>Validation Type:</strong> ${removeArabicScript(fw.type_name)}</div>
+              <div><strong>Validation ID:</strong> ${fw.word_id}</div>
+            `;
+            valContent.appendChild(div);
+          });
+          valCard.style.display = "block";
+        }
+
+        // 3. Render Similar Names Table FIRST (found in Excel sheet)
+        if (data.similar_found && data.similar_names.length > 0) {
+          data.similar_names.forEach((m, idx) => {
+            const tr = document.createElement("tr");
+            let displayName = removeArabicScript(m.original_name);
+
+            tr.innerHTML = `
+              <td style="font-weight:600;font-size:.78rem;color:var(--neutral-light)">${idx + 1}</td>
+              <td><strong>${displayName}</strong></td>
+              <td style="text-align:right"><span class="${badgeClass(m.score)}">${m.score}%</span></td>
+            `;
+            matchesBody.appendChild(tr);
+
+            if (m.explanation) {
+              const exTr = document.createElement("tr");
+              let chipsHtml = "";
+              if (m.common_words && m.common_words.length > 0) {
+                chipsHtml = m.common_words.map(w => `<span class="word-chip">${removeArabicScript(w)}</span>`).filter(c => c).join("");
+              }
+              const cleanExplanation = removeArabicScript(m.explanation);
+              exTr.innerHTML = `
+                <td colspan="3" class="match-explanation">
+                  ${cleanExplanation}<br/>${chipsHtml}
+                </td>
+              `;
+              matchesBody.appendChild(exTr);
+            }
+          });
+          similarCard.style.display = "block";
+        }
+
+        // 4. Render Alternative Suggestions SECOND
+        if (!data.allowed && data.suggestions && data.suggestions.length > 0) {
+          data.suggestions.forEach((s, idx) => {
+            const div = document.createElement("div");
+            div.className = "suggestion-card";
+            div.innerHTML = `
+              <div class="suggestion-num">${idx + 1}</div>
+              <div class="suggestion-name">${removeArabicScript(s.name)}</div>
+            `;
+            suggestGrid.appendChild(div);
+          });
+          suggestCard.style.display = "block";
+        }
+
+        resultsDiv.style.display = "block";
+
+      } catch (err) {
+        errorBox.textContent   = "Error: " + err.message;
+        errorBox.style.display = "block";
+      } finally {
+        hideSpinner();
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
