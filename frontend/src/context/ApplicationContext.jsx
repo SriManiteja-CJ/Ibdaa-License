@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useState } from 'react'
 
 const ApplicationContext = createContext(null)
 
@@ -26,6 +26,8 @@ export const ApplicationProvider = ({ children }) => {
     licenseEmail: '',
     location: '',
     address: '',
+    latitude: '',
+    longitude: '',
     makaniNumber: '',
     tradeNameArabic: '',
     activityArabic: '',
@@ -35,9 +37,9 @@ export const ApplicationProvider = ({ children }) => {
 
   const [submissionResult, setSubmissionResult] = useState(null)
 
-  const updateFormData = (fields) => {
+  const updateFormData = useCallback((fields) => {
     setFormData((prev) => ({ ...prev, ...fields }))
-  }
+  }, [])
 
   const applyExtraction = (extractionData) => {
     setExtraction(extractionData)
@@ -50,6 +52,8 @@ export const ApplicationProvider = ({ children }) => {
       license_email: 'licenseEmail',
       location: 'location',
       address: 'address',
+      latitude: 'latitude',
+      longitude: 'longitude',
       makani_number: 'makaniNumber',
       trade_name_arabic: 'tradeNameArabic',
       activity_arabic: 'activityArabic',

@@ -20,6 +20,8 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no expla
   "license_email": {{"value": "", "confidence": 0.0}},
   "location": {{"value": "", "confidence": 0.0}},
   "address": {{"value": "", "confidence": 0.0}},
+  "latitude": {{"value": "", "confidence": 0.0}},
+  "longitude": {{"value": "", "confidence": 0.0}},
   "makani_number": {{"value": "", "confidence": 0.0}},
   "trade_name_arabic": {{"value": "", "confidence": 0.0}},
   "activity_arabic": {{"value": "", "confidence": 0.0}}
@@ -29,9 +31,28 @@ Rules:
 - confidence is a float between 0.0 and 1.0 (1.0 = certain, 0.0 = not found)
 - For activity_sections: return an array of strings like ["12849 - Printing product design", "43469 - Social media marketing"]
 - If a field is not found or unclear, set value to "" and confidence to 0.0
-- Extract the social media handle/URL from any social media page screenshot
-- For location/address, extract from any address, logo, or watermark visible in the document
-- Do not hallucinate - only extract what is clearly visible in the document
+- main_activity means the product sold or service provided by the business, not its trade name.
+  Determine it from clear evidence such as an official activity description, social-page category
+  or bio, or visible products/services. A trade name alone is not enough unless it unambiguously
+  describes the activity. Return a concise activity; if the evidence does not identify one clearly,
+  leave it empty.
+- social_media_account means the account handle, username, or account URL visible on a social
+  media page. Do not put the business display name or trade name in this field unless it is also
+  explicitly shown as the account username/handle.
+- Only populate license_mobile_number when a phone number is explicitly identified as the
+  license/application mobile number in an official license or application document. A WhatsApp
+  number, page contact number, or phone number shown on a social media setup/profile screenshot is
+  not a license mobile number; leave the field empty unless it is separately confirmed by an
+  official document.
+- For location and address, inspect the uploaded site plan/map. When latitude and longitude are
+  printed on the plan (often labeled Lat and Long), extract both decimal coordinates exactly into
+  latitude and longitude. Use the map pin and its labels to extract the corresponding locality and
+  street/building address. Do not use an unrelated address elsewhere in the documents.
+- For makani_number, extract the Makani number associated with that mapped location if it is shown
+  in the documents. Preserve all digits exactly; do not substitute coordinates, phone numbers, or
+  other numeric identifiers (including a PID/site-plan number), and do not infer a Makani number if
+  one is not available.
+- Do not hallucinate - only return values supported by visible document content or map context
 """
 
 
@@ -90,7 +111,7 @@ def _empty_result() -> dict:
     fields = [
         "trade_name", "main_activity", "activity_sections",
         "social_media_account", "license_mobile_number", "license_email",
-        "location", "address", "makani_number",
+        "location", "address", "latitude", "longitude", "makani_number",
         "trade_name_arabic", "activity_arabic",
     ]
     return {

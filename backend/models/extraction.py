@@ -17,6 +17,8 @@ class ExtractionResult(BaseModel):
     license_email: FieldResult
     location: FieldResult
     address: FieldResult
+    latitude: FieldResult
+    longitude: FieldResult
     makani_number: FieldResult
     trade_name_arabic: FieldResult
     activity_arabic: FieldResult

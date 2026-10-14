@@ -11,50 +11,133 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 })
 
-// Default UAQ coordinates
-const DEFAULT_COORDS = [25.5653, 55.5534]
-
-async function geocode(address) {
-  if (!address) return null
-  try {
-    const query = encodeURIComponent(address + ', Umm Al Quwain, UAE')
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`
-    )
-    const data = await res.json()
-    if (data[0]) return [parseFloat(data[0].lat), parseFloat(data[0].lon)]
-  } catch (_) {}
-  return null
+function validCoordinate(value, min, max) {
+  if (value === null || value === undefined || String(value).trim() === '') return false
+  const number = Number(value)
+  return Number.isFinite(number) && number >= min && number <= max
 }
 
-export default function MapView({ address, location }) {
-  const [coords, setCoords] = useState(DEFAULT_COORDS)
+async function reverseGeocode(latitude, longitude, signal) {
+  const query = new URLSearchParams({
+    lat: String(latitude),
+    lon: String(longitude),
+    format: 'jsonv2',
+    addressdetails: '1',
+  })
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?${query.toString()}`,
+    { signal }
+  )
+  if (!response.ok) throw new Error(`Coordinate lookup failed (${response.status})`)
+  const data = await response.json()
+  const parts = data.address || {}
+  const location =
+    parts.suburb ||
+    parts.neighbourhood ||
+    parts.village ||
+    parts.town ||
+    parts.city ||
+    parts.county ||
+    ''
+
+  if (!data.display_name && !location) {
+    throw new Error('No address was found for the site-plan coordinates')
+  }
+  return {
+    location: location || data.display_name,
+    address: data.display_name || location,
+  }
+}
+
+export default function MapView({
+  latitude,
+  longitude,
+  onLocationResolved,
+}) {
+  const [markerLabel, setMarkerLabel] = useState('')
+  const [lookupError, setLookupError] = useState('')
+  const hasCoordinates =
+    validCoordinate(latitude, -90, 90) && validCoordinate(longitude, -180, 180)
+  const numericLatitude = hasCoordinates ? Number(latitude) : null
+  const numericLongitude = hasCoordinates ? Number(longitude) : null
+  const coords =
+    hasCoordinates ? [numericLatitude, numericLongitude] : null
 
   useEffect(() => {
-    const query = address || location
-    if (query) {
-      geocode(query).then((c) => {
-        if (c) setCoords(c)
-      })
+    const controller = new AbortController()
+    let active = true
+
+    async function resolveCoordinates() {
+      setLookupError('')
+      if (!hasCoordinates) {
+        setMarkerLabel('')
+        return
+      }
+      setMarkerLabel(`${latitude}, ${longitude}`)
+      try {
+        const resolved = await reverseGeocode(
+          numericLatitude,
+          numericLongitude,
+          controller.signal
+        )
+        if (active) {
+          setMarkerLabel(resolved.address)
+          onLocationResolved?.(resolved)
+        }
+      } catch (error) {
+        if (active && error.name !== 'AbortError') {
+          setLookupError('Showing the supplied coordinates; address lookup failed.')
+        }
+      }
     }
-  }, [address, location])
+
+    resolveCoordinates()
+    return () => {
+      active = false
+      controller.abort()
+    }
+  }, [
+    hasCoordinates,
+    latitude,
+    longitude,
+    numericLatitude,
+    numericLongitude,
+    onLocationResolved,
+  ])
 
   return (
-    <div className="map-container">
-      <MapContainer
-        center={coords}
-        zoom={15}
-        style={{ width: '100%', height: '100%' }}
-        key={coords.join(',')}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; OpenStreetMap contributors'
-        />
-        <Marker position={coords}>
-          <Popup>{address || location || 'UAQ'}</Popup>
-        </Marker>
-      </MapContainer>
-    </div>
+    <>
+      {coords ? (
+        <div className="map-container">
+          <MapContainer
+            center={coords}
+            zoom={18}
+            style={{ width: '100%', height: '100%' }}
+            key={coords.join(',')}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; OpenStreetMap contributors'
+            />
+            <Marker position={coords}>
+              <Popup>{markerLabel}</Popup>
+            </Marker>
+          </MapContainer>
+        </div>
+      ) : (
+        <div
+          className="map-container"
+          role="status"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280' }}
+        >
+          Coordinates not found in the uploaded site plan.
+        </div>
+      )}
+      {lookupError && (
+        <div role="status" style={{ marginTop: 6, color: '#92400e', fontSize: 12 }}>
+          {lookupError}
+        </div>
+      )}
+    </>
   )
 }

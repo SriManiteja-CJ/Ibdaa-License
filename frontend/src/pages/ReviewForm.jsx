@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react'
+import { useCallback, useEffect, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sparkles, QrCode } from 'lucide-react'
 import Layout from '../components/layout/Layout'
@@ -34,6 +34,13 @@ export default function ReviewForm() {
   }, [extraction, navigate])
 
   const status = (formKey) => getFieldStatus(AI_FIELD_MAP[formKey] || formKey)
+
+  const handleLocationResolved = useCallback((resolved) => {
+    updateFormData({
+      location: resolved.location,
+      address: resolved.address,
+    })
+  }, [updateFormData])
 
   const handleRemoveChip = (index) => {
     const updated = formData.activitySections.filter((_, i) => i !== index)
@@ -186,7 +193,11 @@ export default function ReviewForm() {
               />
             </div>
             <Suspense fallback={<div className="map-container" style={{ background: '#f3f4f8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: '#9ca3af' }}>Loading map...</div>}>
-              <MapView address={formData.address} location={formData.location} />
+              <MapView
+                latitude={formData.latitude}
+                longitude={formData.longitude}
+                onLocationResolved={handleLocationResolved}
+              />
             </Suspense>
           </div>
         </div>

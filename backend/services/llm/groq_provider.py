@@ -8,9 +8,11 @@ from config import settings
 
 def _pil_to_base64_url(image: PIL.Image.Image) -> str:
     buf = io.BytesIO()
-    image.save(buf, format="PNG")
+    image = image.convert("RGB")
+    image.thumbnail((2048, 2048), PIL.Image.Resampling.LANCZOS)
+    image.save(buf, format="JPEG", quality=85, optimize=True)
     b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-    return f"data:image/png;base64,{b64}"
+    return f"data:image/jpeg;base64,{b64}"
 
 
 class GroqProvider(BaseVisionProvider):
