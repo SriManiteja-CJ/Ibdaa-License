@@ -130,6 +130,12 @@ input, textarea, select { font-family: inherit; }
   gap: 12px;
 }
 
+.header-brand-logo {
+  height: 44px;
+  max-width: 420px;
+  object-fit: contain;
+}
+
 .header-logo-emblem {
   width: 44px;
   height: 44px;
@@ -813,3 +819,124 @@ input, textarea, select { font-family: inherit; }
   max-width: 60px;
 }
 .step-connector.done { background: var(--success-green); }
+
+/* ─── Activity Intelligence Styles ─────────────────────────────────── */
+.activity-intelligence-card {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.activity-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eef2ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.category-badge-ar {
+  font-size: 12px;
+  color: #6366f1;
+  font-weight: 500;
+}
+
+.activity-reason-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #475569;
+  line-height: 1.4;
+  background: #ffffff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+.activity-quick-picks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.activity-quick-picks-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quick-pick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.quick-pick-chip {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 16px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-pick-chip:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.quick-pick-chip.selected {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #1d4ed8;
+  font-weight: 500;
+}
+
+.btn-suggest-mini {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-suggest-mini:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.btn-suggest-mini:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

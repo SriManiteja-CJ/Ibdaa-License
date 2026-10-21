@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import settings
-from routers import documents, license, llm_config
+from routers import documents, license, llm_config, activity
 
 app = FastAPI(
     title="UAQ Trade License – DED Smart Services API",
@@ -22,6 +22,7 @@ app.add_middleware(
 app.include_router(documents.router)
 app.include_router(license.router)
 app.include_router(llm_config.router)
+app.include_router(activity.router)
 
 
 @app.get("/api/health")

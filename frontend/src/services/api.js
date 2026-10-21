@@ -31,4 +31,18 @@ export const checkLLMHealth = async () => {
   return res.data
 }
 
+export const getActivityCategories = async () => {
+  const res = await api.get('/activity/categories')
+  return res.data
+}
+
+export const suggestActivity = async (tradeName, tradeNameArabic = '', context = '') => {
+  const res = await api.post('/activity/suggest', {
+    trade_name: tradeName,
+    trade_name_arabic: tradeNameArabic,
+    context,
+  })
+  return res.data
+}
+
 export default api

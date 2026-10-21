@@ -31,6 +31,8 @@ export const ApplicationProvider = ({ children }) => {
     makaniNumber: '',
     tradeNameArabic: '',
     activityArabic: '',
+    activityCategory: '',
+    activityReason: '',
     socialMediaUrl: '',
     termsAccepted: false,
   })
@@ -57,6 +59,8 @@ export const ApplicationProvider = ({ children }) => {
       makani_number: 'makaniNumber',
       trade_name_arabic: 'tradeNameArabic',
       activity_arabic: 'activityArabic',
+      activity_category: 'activityCategory',
+      activity_reason: 'activityReason',
     }
     const updates = {}
     for (const [apiField, formField] of Object.entries(mapping)) {

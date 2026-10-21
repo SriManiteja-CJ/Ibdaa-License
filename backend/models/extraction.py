@@ -22,3 +22,5 @@ class ExtractionResult(BaseModel):
     makani_number: FieldResult
     trade_name_arabic: FieldResult
     activity_arabic: FieldResult
+    activity_category: Optional[FieldResult] = None
+    activity_reason: Optional[FieldResult] = None

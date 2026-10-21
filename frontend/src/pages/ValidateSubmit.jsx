@@ -107,6 +107,11 @@ export default function ValidateSubmit() {
             <div className="validate-label">Activity</div>
             <div>
               <div className="validate-value">{formData.mainActivity || '—'}</div>
+              {formData.activityCategory && (
+                <div style={{ fontSize: 12, color: '#4f46e5', fontWeight: 500, marginTop: 2 }}>
+                  Category: {formData.activityCategory}
+                </div>
+              )}
               {formData.activityArabic && (
                 <div className="validate-value-sub">{formData.activityArabic}</div>
               )}

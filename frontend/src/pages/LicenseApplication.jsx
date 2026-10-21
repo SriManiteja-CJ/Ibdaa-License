@@ -30,6 +30,15 @@ export default function LicenseApplication() {
         uploadedFiles.sitePlan,
         uploadedFiles.socialMediaUrl
       )
+      if (!result.document_validation?.is_valid) {
+        const issues = result.document_validation?.issues || []
+        setError(
+          issues.length
+            ? `Please check your uploaded documents:\n${issues.join('\n')}`
+            : 'The uploaded documents could not be confirmed as the expected types. Please check them and try again.'
+        )
+        return
+      }
       applyExtraction(result.extraction)
       navigate('/services/ibdaa-license/review')
     } catch (err) {
@@ -130,7 +139,7 @@ export default function LicenseApplication() {
           </div>
 
           {error && (
-            <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8, color: '#dc2626', fontSize: 13 }}>
+            <div style={{ marginTop: 12, display: 'flex', alignItems: 'flex-start', gap: 8, color: '#dc2626', fontSize: 13, whiteSpace: 'pre-line' }}>
               <Info size={15} /> {error}
             </div>
           )}
